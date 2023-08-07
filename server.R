@@ -5,7 +5,7 @@ server <- function(input, output) {
   
   token <- anonymous_login(project_api = "AIzaSyDt2yl4_YFhPmaLnlowccxGJKARPfMhFjE")
   purl = "https://esp32-firebase-demo-b9d6b-default-rtdb.firebaseio.com/"
-  fname = "test3"
+  #fname = "test3"
   
   output$distPlot <- renderPlot({
     dist <- rnorm(input$obs)
@@ -21,12 +21,31 @@ server <- function(input, output) {
   })
   
   dataInput <- reactive({
+    fname = input$firebase_node
     urlPath = paste0(purl,"/",fname,".json")
     data = httr::GET(url = urlPath)
     xx = jsonlite::fromJSON(httr::content(data,"text"))
     return(xx)
   })
   
+  output$count <- renderValueBox({
+    fb.json = dataInput()
+    fb.key = input$firebase_key
+    fb.value = "null"
+    fb.value = fb.json[[fb.key]]
+    
+    valueBox(
+      value = formatC(fb.value, digits = 2, format = "f"),
+      subtitle = "Arduino Sensor X",
+      icon = icon("area-chart"),
+      color = "yellow"
+      # width = 22
+      #color = if (downloadRate >= input$rateThreshold) "yellow" else "aqua"
+    )
+  })    
+    
+    
+    
   output$rate <- renderValueBox({
     tt = dataInput()
     # urlPath = paste0(purl,"/",fname,".json")
